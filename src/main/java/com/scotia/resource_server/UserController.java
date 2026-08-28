@@ -11,11 +11,11 @@ public class UserController {
     // get status endpoint
     @GetMapping("/users/{userId}/status/{code}")
     public UserStatus getUserStatus(@PathVariable String userId, @PathVariable String code) {
-        String status = switch (code){
-            case "A" -> "active";
-            case "L" -> "locked";
-            case "S" -> "suspended";
-            default -> "unknown";
+        AccountStatus status = switch (code){
+            case "A" -> AccountStatus.ACTIVE;
+            case "L" -> AccountStatus.LOCKED;
+            case "S" -> AccountStatus.SUSPENDED;
+            default -> AccountStatus.UNKNOWN;
         };
         return new UserStatus(userId, status);
     }
