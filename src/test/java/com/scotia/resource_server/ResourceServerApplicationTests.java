@@ -26,7 +26,7 @@ class ResourceServerApplicationTests {
 		mockMvc.perform(get("/users/salem/status/A"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.userId").value("salem"))
-				.andExpect(jsonPath("$.status").value("active"));
+				.andExpect(jsonPath("$.status").value("ACTIVE"));
 	}
 
 	// new test for locked status
@@ -35,7 +35,7 @@ class ResourceServerApplicationTests {
 		mockMvc.perform(get("/users/simon/status/L"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.userId").value("simon"))
-				.andExpect(jsonPath("$.status").value("locked"));
+				.andExpect(jsonPath("$.status").value("LOCKED"));
 	}
 
 }
