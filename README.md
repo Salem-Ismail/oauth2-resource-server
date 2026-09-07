@@ -24,7 +24,7 @@ invalid ones are rejected with 401.
 
 - [x] Auth0 setup as identity provider
 
-- [ ] JWT/JWKS validation (in progress)
+- [x] JWT/JWKS validation (in progress)
 
 - [ ] Role-based access control
  
