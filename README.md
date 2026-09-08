@@ -26,7 +26,7 @@ invalid ones are rejected with 401.
 
 - [x] JWT/JWKS validation (in progress)
 
-- [ ] Role-based access control
+- [x] Role-based access control
  
 ## Endpoints
 
