@@ -1,4 +1,4 @@
-package com.scotia.resource_server;
+package com.salem.resourceserver;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

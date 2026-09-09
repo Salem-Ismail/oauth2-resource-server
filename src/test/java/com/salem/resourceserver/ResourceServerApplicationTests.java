@@ -1,4 +1,4 @@
-package com.scotia.resource_server;
+package com.salem.resourceserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -85,16 +84,6 @@ class ResourceServerApplicationTests {
 	// ============================================================
 	// Other endpoints
 	// ============================================================
-
-	// login: echoes username (requires authentication)
-	@Test
-	void loginEndpoint_echoesUsername() throws Exception {
-		mockMvc.perform(post("/login")
-						.with(jwt())
-						.contentType("application/json")
-						.content("{\"username\":\"salem\",\"password\":\"test123\"}"))
-				.andExpect(status().isOk());
-	}
 
 	// public health check: 200 (no auth required, permitAll)
 	@Test

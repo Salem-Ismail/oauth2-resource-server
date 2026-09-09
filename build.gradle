@@ -5,7 +5,7 @@ plugins {
 	id 'jacoco'
 }
 
-group = 'com.scotia'
+group = 'com.salem'
 version = '0.0.1-SNAPSHOT'
 
 java {

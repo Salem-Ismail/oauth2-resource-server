@@ -1,3 +1,3 @@
-package com.scotia.resource_server;
+package com.salem.resourceserver;
 
 public record HealthStatus(String status) {}

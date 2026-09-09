@@ -1,4 +1,4 @@
-package com.scotia.resource_server;
+package com.salem.resourceserver;
 
 public enum AccountStatus {
     ACTIVE,

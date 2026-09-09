@@ -1,4 +1,4 @@
-package com.scotia.resource_server;
+package com.salem.resourceserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
