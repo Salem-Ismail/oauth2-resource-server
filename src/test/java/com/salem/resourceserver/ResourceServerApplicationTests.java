@@ -19,16 +19,18 @@ class ResourceServerApplicationTests {
 	@Autowired
 	MockMvc mockMvc;
 
-	// ============================================================
+	// =======================================================================================
 	// Status endpoint: status-code mapping (the switch branches)
-	// Each test covers one branch of getUserStatus's switch.
-	// ============================================================
+	// Each test covers one branch of getUserStatus's switch. Includes new ownership check.
+	// =======================================================================================
 
 	// A: ACTIVE
 	@Test
 	void statusEndpoint_returnsActive_forCodeA() throws Exception {
 		mockMvc.perform(get("/users/salem/status/A")
-						.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
+						.with(jwt()
+								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
+								.authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.userId").value("salem"))
 				.andExpect(jsonPath("$.status").value("ACTIVE"));
@@ -38,7 +40,9 @@ class ResourceServerApplicationTests {
 	@Test
 	void statusEndpoint_returnsLocked_forCodeL() throws Exception {
 		mockMvc.perform(get("/users/salem/status/L")
-						.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
+						.with(jwt()
+								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
+								.authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("LOCKED"));
 	}
@@ -47,7 +51,9 @@ class ResourceServerApplicationTests {
 	@Test
 	void statusEndpoint_returnsSuspended_forCodeS() throws Exception {
 		mockMvc.perform(get("/users/salem/status/S")
-						.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
+						.with(jwt()
+								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
+								.authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("SUSPENDED"));
 	}
@@ -56,7 +62,9 @@ class ResourceServerApplicationTests {
 	@Test
 	void statusEndpoint_returnsUnknown_forInvalidCode() throws Exception {
 		mockMvc.perform(get("/users/salem/status/Z")
-						.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
+						.with(jwt()
+								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
+								.authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("UNKNOWN"));
 	}
@@ -70,7 +78,9 @@ class ResourceServerApplicationTests {
 	@Test
 	void statusEndpoint_returnsForbidden_withInsufficientScope() throws Exception {
 		mockMvc.perform(get("/users/salem/status/A")
-						.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_write:status"))))
+						.with(jwt()
+								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
+								.authorities(new SimpleGrantedAuthority("SCOPE_write:status"))))
 				.andExpect(status().isForbidden());
 	}
 
@@ -79,6 +89,32 @@ class ResourceServerApplicationTests {
 	void statusEndpoint_returnsUnauthorized_withoutToken() throws Exception {
 		mockMvc.perform(get("/users/simon/status/L"))
 				.andExpect(status().isUnauthorized());
+	}
+
+	// ============================================================
+	// Status endpoint: ownership (the third gate, fine-grained)
+	// Same scope, varying the acting_user claim vs the requested
+	// userId to prove a caller can only access their own resource.
+	// ============================================================
+
+	// caller accessing their own resource → 200 (ownership check passes)
+	@Test
+	void statusEndpoint_allowsAccessToOwnResource() throws Exception {
+		mockMvc.perform(get("/users/salem/status/A")
+						.with(jwt()
+								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
+								.authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
+				.andExpect(status().isOk());
+	}
+
+	// caller accessing another user's resource → 403 (IDOR blocked)
+	@Test
+	void statusEndpoint_blocksAccessToOtherUsersResource() throws Exception {
+		mockMvc.perform(get("/users/simon/status/A")
+						.with(jwt()
+								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
+								.authorities(new SimpleGrantedAuthority("SCOPE_read:status"))))
+				.andExpect(status().isForbidden());
 	}
 
 	// ============================================================
