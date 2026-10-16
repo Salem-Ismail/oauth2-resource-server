@@ -31,16 +31,18 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 
 	// generate a coverage report every time tests run:
 	finalizedBy jacocoTestReport
 }
 
 tasks.named('jacocoTestReport') {
-	// report needs tests to have run:
+	// report needs tests to have run
 	dependsOn test
+	// excluding the AVP wrapper: it's mocked in tests, not unit-tested
+	classDirectories.setFrom(files(classDirectories.files.collect {
+		fileTree(dir: it, exclude: [
+				'**/AuthorizationService.class'
+		])
+	}))
 }

@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.verifiedpermissions.VerifiedPermissionsClient;
 import software.amazon.awssdk.services.verifiedpermissions.model.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // delegates ownership decisions to Amazon Verified Permissions.
 // builds a PARC request, sends it to AVP, and returns the allow/deny verdict for the app to enforce
 @Service
@@ -12,6 +15,9 @@ public class AuthorizationService {
 
     private final VerifiedPermissionsClient avpClient;
     private final String policyStoreId;
+
+    // logs each authorization decision as a structured audit event
+    private static final Logger log = LoggerFactory.getLogger(AuthorizationService.class);
 
     // policyStoreId is injected from application.properties; the AVP client resolves
     // credentials and region automatically from the environment (outside repo)
@@ -68,6 +74,12 @@ public class AuthorizationService {
 
         // call AVP and return true only on an explicit ALLOW
         IsAuthorizedResponse response = avpClient.isAuthorized(request);
-        return response.decision() == Decision.ALLOW;
+        boolean allowed = response.decision() == Decision.ALLOW;
+
+        // audit log: every authorization decision for traceability
+        log.info("Authorization decision: principal={} action=readStatus resource={} decision={}",
+                actingUser, requestedUserId, allowed ? "ALLOW" : "DENY");
+
+        return allowed;
     }
 }
