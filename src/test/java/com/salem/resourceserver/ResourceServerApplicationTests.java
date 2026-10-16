@@ -6,11 +6,13 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest                 // start the spring app for this test
 @AutoConfigureMockMvc           // set up the fake http caller
@@ -18,6 +20,9 @@ class ResourceServerApplicationTests {
 
 	@Autowired
 	MockMvc mockMvc;
+
+	@MockitoBean
+	AuthorizationService authorizationService;
 
 	// =======================================================================================
 	// Status endpoint: status-code mapping (the switch branches)
@@ -27,6 +32,8 @@ class ResourceServerApplicationTests {
 	// A: ACTIVE
 	@Test
 	void statusEndpoint_returnsActive_forCodeA() throws Exception {
+		when(authorizationService.isAllowed("salem", "salem")).thenReturn(true);
+
 		mockMvc.perform(get("/users/salem/status/A")
 						.with(jwt()
 								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
@@ -39,6 +46,8 @@ class ResourceServerApplicationTests {
 	// L: LOCKED
 	@Test
 	void statusEndpoint_returnsLocked_forCodeL() throws Exception {
+		when(authorizationService.isAllowed("salem", "salem")).thenReturn(true);
+
 		mockMvc.perform(get("/users/salem/status/L")
 						.with(jwt()
 								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
@@ -50,6 +59,8 @@ class ResourceServerApplicationTests {
 	// S: SUSPENDED
 	@Test
 	void statusEndpoint_returnsSuspended_forCodeS() throws Exception {
+		when(authorizationService.isAllowed("salem", "salem")).thenReturn(true);
+
 		mockMvc.perform(get("/users/salem/status/S")
 						.with(jwt()
 								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
@@ -61,6 +72,8 @@ class ResourceServerApplicationTests {
 	// unknown code: UNKNOWN (default branch)
 	@Test
 	void statusEndpoint_returnsUnknown_forInvalidCode() throws Exception {
+		when(authorizationService.isAllowed("salem", "salem")).thenReturn(true);
+
 		mockMvc.perform(get("/users/salem/status/Z")
 						.with(jwt()
 								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
@@ -100,6 +113,8 @@ class ResourceServerApplicationTests {
 	// caller accessing their own resource → 200 (ownership check passes)
 	@Test
 	void statusEndpoint_allowsAccessToOwnResource() throws Exception {
+		when(authorizationService.isAllowed("salem", "salem")).thenReturn(true);
+
 		mockMvc.perform(get("/users/salem/status/A")
 						.with(jwt()
 								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
@@ -110,6 +125,8 @@ class ResourceServerApplicationTests {
 	// caller accessing another user's resource → 403 (IDOR blocked)
 	@Test
 	void statusEndpoint_blocksAccessToOtherUsersResource() throws Exception {
+		when(authorizationService.isAllowed("salem", "simon")).thenReturn(false);
+
 		mockMvc.perform(get("/users/simon/status/A")
 						.with(jwt()
 								.jwt(builder -> builder.claim("https://resource-server-api/acting_user", "salem"))
