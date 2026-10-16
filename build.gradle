@@ -22,6 +22,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation platform('software.amazon.awssdk:bom:2.55.0')
+	implementation 'software.amazon.awssdk:verifiedpermissions'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

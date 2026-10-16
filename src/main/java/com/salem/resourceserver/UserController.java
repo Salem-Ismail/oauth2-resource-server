@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 public class UserController {
+    private final AuthorizationService authorizationService;
+
+    public UserController(AuthorizationService authorizationService) {
+        this.authorizationService = authorizationService;
+    }
+
     // get status endpoint
     @GetMapping("/users/{userId}/status/{code}")
     @PreAuthorize("hasAuthority('SCOPE_read:status')")
@@ -22,7 +28,7 @@ public class UserController {
         String actingUser = jwt.getClaimAsString("https://resource-server-api/acting_user");
 
         // ownership check (can this caller access this user's data)
-        if (!userId.equals(actingUser)) {
+        if (!authorizationService.isAllowed(actingUser, userId)) {
             throw new AccessDeniedException("You can only access your own status");
         }
 
